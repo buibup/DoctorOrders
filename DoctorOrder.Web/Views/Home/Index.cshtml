@@ -1,0 +1,707 @@
+﻿@model DoctorOrder.Web.Models.PatientDrugGroupViewModel
+@using DoctorOrder.Web.Models
+
+
+@{
+    ViewBag.Title = "Doctor Order";
+}
+
+@{
+    var patient = Model.Patient;
+    var items = Model.DrugDateList;
+}
+
+@{
+    string time = string.Empty;
+}
+
+
+<link href="~/Template/responsive-vertical-timeline/css/normalize.min.css" rel="stylesheet" />
+<link href="~/Template/responsive-vertical-timeline/css/style.css" rel="stylesheet" />
+<link href="~/Content/font-awesome.min.css" rel="stylesheet" />
+
+<div class="container text-center">
+    <div class="panel panel-primary">
+        <div class="panel-heading clearfix">
+            @*<h2 class="panel-title">
+                    <label class="col-md-11 control-label text-center">HN : @patient.HN</label>
+                    <span class="col-md-11 pull-right glyphicon glyphicon-chevron-down" aria-hidden="true" data-toggle="collapse" href="#collapseInfo" aria-expanded="false"></span>
+                </h2>*@
+            <a class="accordion-toggle" data-toggle="collapse" href="#collapseInfo">
+                <span>HN : @patient.HN</span>
+            </a>
+        </div>
+
+        <div class="panel-body in" id="collapseInfo">
+            <form class="form-horizontal row-border" action="#">
+                <div class="form-group">
+
+                    <label class="col-md-2 control-label-right">Name</label>
+                    <div class="col-md-3 control-label-left">
+                        @patient.Name
+                    </div>
+                    <label class="col-md-2 control-label-right">Gender</label>
+                    <div class="col-md-2 control-label-left">
+                        @patient.Gender
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label-right">Episode No</label>
+                    <div class="col-md-3 control-label-left">
+                        @patient.EpisodeNo
+                    </div>
+                    <label class="col-md-2 control-label-right">Date of Birth</label>
+                    <div class="col-md-5 control-label-left">
+                        @patient.DOB (@patient.Age years)
+                    </div>
+
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="fixedOneDay">
+    One Day
+</div>
+<div class="fixedContinue">
+    Continue
+</div>
+<section id="conference-timeline">
+    <div class="timeline-start">Start</div>
+    <div class="conference-center-line"></div>
+    <div class="conference-timeline-content">
+
+        @foreach (var item in items)
+        {
+            time = string.Empty;
+
+            <div class="timeline-start">@item.StartDate</div>
+            foreach (var drgTime in item.DrugTime)
+            {
+                var OneDayOrdersCount = @drgTime.OneDayOrders.Verified.Count + @drgTime.OneDayOrders.Executed.Count;
+                var ContinueOrdersCount = @drgTime.ContinueOrders.Verified.Count + @drgTime.ContinueOrders.Executed.Count + @drgTime.ContinueOrders.Discontinued.Count + @drgTime.ContinueOrders.Cancel.Count;
+
+                var maxCountItem = (ContinueOrdersCount > OneDayOrdersCount) ? OneDayOrdersCount : OneDayOrdersCount;
+
+
+                <div class="timeline-article">
+
+                    @for (int countItem = 0; countItem < maxCountItem; countItem++)
+                    {
+                        <!-- #region onedayorders-->
+                        if (OneDayOrdersCount != 0 && OneDayOrdersCount > countItem)
+                        {
+
+                            var OneDayOrdersVCount = @drgTime.OneDayOrders.Verified.Count;
+                            var OneDayOrdersECount = @drgTime.OneDayOrders.Executed.Count;
+                            var countE = 0;
+
+                            <div class="content-left-container">
+                                <div class="content-left">
+                                    <table class="table">
+
+                                        <!-- #region show order OneDayOrders.Verified -->
+                                        @if (countItem < OneDayOrdersVCount)
+                                        {
+
+                                        <tr>
+                                            <!-- Header -->
+                                            <th colspan="4"><span>@drgTime.OneDayOrders.Verified[countItem].OSTAT_Desc</span></th>
+                                        </tr>
+                                        <tr>
+                                            <!-- Detail -->
+                                            <td style="width:40%">
+                                                @drgTime.OneDayOrders.Verified[countItem].Service
+                                            </td>
+                                            <td style="width:10%">
+                                                @drgTime.OneDayOrders.Verified[countItem].Qty
+                                            </td>
+                                            <td style="width:25%">
+                                                @drgTime.OneDayOrders.Verified[countItem].Dose
+                                            </td>
+                                            <td style="width:25%">
+                                                @drgTime.OneDayOrders.Verified[countItem].AddUserName
+                                            </td>
+                                        </tr>
+
+                                            <!-- Rander Question List -->
+                                        if (drgTime.OneDayOrders.Verified[countItem].QuestionAnswerModel.Length > 0)
+                                            {
+                                                String temptQuestHeader = "";
+                                                Boolean setBackgroundColor = false;
+                                        <tr>
+                                            <td colspan="4">
+                                                <table class="tableOrderList" style="width:100%">
+                                                    @foreach (var questAnsItem in drgTime.OneDayOrders.Verified[countItem].QuestionAnswerModel)
+                                                            {
+                                                                if (questAnsItem.Head != temptQuestHeader)
+                                                                {
+                                                                    setBackgroundColor = !setBackgroundColor;
+                                                                    if (setBackgroundColor)
+                                                                    {
+                                                    <tr style="background-color:beige;">
+                                                        <td style="width:35%;color:blue;">
+                                                            @questAnsItem.Head
+                                                        </td>
+                                                        <td style="width:35%">
+                                                            @questAnsItem.Title
+                                                        </td>
+                                                        <td style="width:30%">
+                                                            @questAnsItem.Ans
+                                                        </td>
+                                                    </tr>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                    <tr>
+                                                        <td style="width:35%;color:blue;">
+                                                            @questAnsItem.Head
+                                                        </td>
+                                                        <td style="width:35%">
+                                                            @questAnsItem.Title
+                                                        </td>
+                                                        <td style="width:30%">
+                                                            @questAnsItem.Ans
+                                                        </td>
+                                                    </tr>
+                                                                    }
+
+                                                                    temptQuestHeader = questAnsItem.Head;
+                                                                }
+                                                                else
+                                                                {
+                                                                    if (setBackgroundColor)
+                                                                    {
+                                                    <tr style="background-color:beige;">
+                                                        <td style="width:35%">
+                                                            &nbsp;
+                                                        </td>
+                                                        <td style="width:35%">
+                                                            @Html.Raw(@questAnsItem.Title)
+                                                        </td>
+                                                        <td style="width:30%">
+                                                            @questAnsItem.Ans
+                                                        </td>
+                                                    </tr>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                    <tr>
+                                                        <td style="width:35%">
+                                                            &nbsp;
+                                                        </td>
+                                                        <td style="width:35%">
+                                                            @Html.Raw(@questAnsItem.Title)
+                                                        </td>
+                                                        <td style="width:30%">
+                                                            @questAnsItem.Ans
+                                                        </td>
+                                                    </tr>
+                                                                    }
+                                                                }
+                                                            }
+
+                                                </table>
+                                            </td>
+                                        </tr>
+                                            }
+
+                                        }
+                                        <!-- #endregion -->
+                                        <!-- #region show order OneDayOrders.Executed -->
+                                        else
+                                        {
+                                        @if (countE < OneDayOrdersECount)
+                                            {
+
+                                        <tr>
+                                            <!-- Header -->
+                                            <th colspan="4"><span>@drgTime.OneDayOrders.Executed[countE].OSTAT_Desc</span></th>
+                                        </tr>
+                                        <tr>
+                                            <!-- Detail -->
+                                            <td style="width:40%">
+                                                @drgTime.OneDayOrders.Executed[countE].Service
+                                            </td>
+                                            <td style="width:10%">
+                                                @drgTime.OneDayOrders.Executed[countE].Qty
+                                            </td>
+                                            <td style="width:25%">
+                                                @drgTime.OneDayOrders.Executed[countE].Dose
+                                            </td>
+                                            <td style="width:25%">
+                                                @drgTime.OneDayOrders.Executed[countE].AddUserName
+                                            </td>
+                                        </tr>
+
+                                                <!-- Rander Question List -->
+                                                if (drgTime.OneDayOrders.Executed[countE].QuestionAnswerModel.Length > 0)
+                                                {
+                                                    String temptQuestHeader = "";
+                                                    Boolean setBackgroundColor = false;
+                                        <tr>
+                                            <td colspan="4">
+                                                <table class="tableOrderList" style="width:100%">
+                                                    @foreach (var questAnsItem in drgTime.OneDayOrders.Executed[countE].QuestionAnswerModel)
+                                                                {
+                                                                    if (questAnsItem.Head != temptQuestHeader)
+                                                                    {
+                                                                        setBackgroundColor = !setBackgroundColor;
+                                                                        if (setBackgroundColor)
+                                                                        {
+                                                    <tr style="background-color:beige;">
+                                                        <td style="width:35%;color:blue;">
+                                                            @questAnsItem.Head
+                                                        </td>
+                                                        <td style="width:35%">
+                                                            @questAnsItem.Title
+                                                        </td>
+                                                        <td style="width:30%">
+                                                            @questAnsItem.Ans
+                                                        </td>
+                                                    </tr>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                    <tr>
+                                                        <td style="width:35%;color:blue;">
+                                                            @questAnsItem.Head
+                                                        </td>
+                                                        <td style="width:35%">
+                                                            @questAnsItem.Title
+                                                        </td>
+                                                        <td style="width:30%">
+                                                            @questAnsItem.Ans
+                                                        </td>
+                                                    </tr>
+                                                                        }
+
+                                                                        temptQuestHeader = questAnsItem.Head;
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        if (setBackgroundColor)
+                                                                        {
+                                                    <tr style="background-color:beige;">
+                                                        <td style="width:35%">
+                                                            &nbsp;
+                                                        </td>
+                                                        <td style="width:35%">
+                                                            @Html.Raw(@questAnsItem.Title)
+                                                        </td>
+                                                        <td style="width:30%">
+                                                            @questAnsItem.Ans
+                                                        </td>
+                                                    </tr>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                    <tr>
+                                                        <td style="width:35%">
+                                                            &nbsp;
+                                                        </td>
+                                                        <td style="width:35%">
+                                                            @Html.Raw(@questAnsItem.Title)
+                                                        </td>
+                                                        <td style="width:30%">
+                                                            @questAnsItem.Ans
+                                                        </td>
+                                                    </tr>
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                </table>
+                                            </td>
+                                        </tr>
+                                                }
+
+                                                countE++;
+                                            }
+
+                                        }
+                                        <!-- #endregion show order OneDayOrders.Executed -->
+
+
+                                    </table>
+                                </div>
+                                <span class="timeline-author"></span>
+                            </div>
+                        }
+
+                        <!--#endregion-->
+
+                        <!--#region continueorders-->
+                        if (ContinueOrdersCount != 0 && ContinueOrdersCount > countItem)
+                        {
+
+                            var ContinueOrdersVCount = @drgTime.ContinueOrders.Verified.Count;
+                            var ContinueOrdersECount = @drgTime.ContinueOrders.Executed.Count;
+                            var ContinueOrdersDCount = @drgTime.ContinueOrders.Discontinued.Count;
+                            var ContinueOrdersCCount = @drgTime.ContinueOrders.Cancel.Count;
+                            var countE = 0;
+                            var countD = 0;
+                            var countC = 0;
+
+                            <div class="content-right-container">
+                                <div class="content-right">
+                                    <table class="table">
+
+                                        <!-- #region show order continueOrders.Verified -->
+                                        @if (countItem < ContinueOrdersVCount)
+                                        {
+
+                                        <tr>
+                                            <!-- Header -->
+                                            <th colspan="4"><span>@drgTime.OneDayOrders.Verified[countItem].OSTAT_Desc</span></th>
+                                        </tr>
+                                        <tr>
+                                            <!-- Detail -->
+                                            <td style="width:40%">
+                                                @drgTime.OneDayOrders.Verified[countItem].Service
+                                            </td>
+                                            <td style="width:10%">
+                                                @drgTime.OneDayOrders.Verified[countItem].Qty
+                                            </td>
+                                            <td style="width:25%">
+                                                @drgTime.OneDayOrders.Verified[countItem].Dose
+                                            </td>
+                                            <td style="width:25%">
+                                                @drgTime.OneDayOrders.Verified[countItem].AddUserName
+                                            </td>
+                                        </tr>
+
+                                            <!-- Rander Question List -->
+                                            if (drgTime.OneDayOrders.Verified[countItem].QuestionAnswerModel.Length > 0)
+                                            {
+                                                String temptQuestHeader = "";
+                                                Boolean setBackgroundColor = false;
+                                        <tr>
+                                            <td colspan="4">
+                                                <table class="tableOrderList" style="width:100%">
+                                                    @foreach (var questAnsItem in drgTime.OneDayOrders.Verified[countItem].QuestionAnswerModel)
+                                                            {
+                                                                if (questAnsItem.Head != temptQuestHeader)
+                                                                {
+                                                                    setBackgroundColor = !setBackgroundColor;
+                                                                    if (setBackgroundColor)
+                                                                    {
+                                                            <tr style="background-color:beige;">
+                                                                <td style="width:35%;color:blue;">
+                                                                    @questAnsItem.Head
+                                                                </td>
+                                                                <td style="width:35%">
+                                                                    @questAnsItem.Title
+                                                                </td>
+                                                                <td style="width:30%">
+                                                                    @questAnsItem.Ans
+                                                                </td>
+                                                            </tr>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                            <tr>
+                                                                <td style="width:35%;color:blue;">
+                                                                    @questAnsItem.Head
+                                                                </td>
+                                                                <td style="width:35%">
+                                                                    @questAnsItem.Title
+                                                                </td>
+                                                                <td style="width:30%">
+                                                                    @questAnsItem.Ans
+                                                                </td>
+                                                            </tr>
+                                                                    }
+
+                                                                    temptQuestHeader = questAnsItem.Head;
+                                                                }
+                                                                else
+                                                                {
+                                                                    if (setBackgroundColor)
+                                                                    {
+                                                            <tr style="background-color:beige;">
+                                                                <td style="width:35%">
+                                                                    &nbsp;
+                                                                </td>
+                                                                <td style="width:35%">
+                                                                    @Html.Raw(@questAnsItem.Title)
+                                                                </td>
+                                                                <td style="width:30%">
+                                                                    @questAnsItem.Ans
+                                                                </td>
+                                                            </tr>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                            <tr>
+                                                                <td style="width:35%">
+                                                                    &nbsp;
+                                                                </td>
+                                                                <td style="width:35%">
+                                                                    @Html.Raw(@questAnsItem.Title)
+                                                                </td>
+                                                                <td style="width:30%">
+                                                                    @questAnsItem.Ans
+                                                                </td>
+                                                            </tr>
+                                                                    }
+                                                                }
+                                                            }
+
+                                                </table>
+                                            </td>
+                                        </tr>
+                                            }
+
+                                        }
+                                        <!-- #endregion -->
+                                       
+                                        else
+                                        {
+                                        <!-- #region show order coninueorders.Executed -->
+                                        @if (countE < ContinueOrdersECount)
+                                        {
+
+                                            <tr>
+                                                <!-- Header -->
+                                                <th colspan="4"><span>@drgTime.OneDayOrders.Executed[countE].OSTAT_Desc</span></th>
+                                            </tr>
+                                            <tr>
+                                                <!-- Detail -->
+                                                <td style="width:40%">
+                                                    @drgTime.OneDayOrders.Executed[countE].Service
+                                                </td>
+                                                <td style="width:10%">
+                                                    @drgTime.OneDayOrders.Executed[countE].Qty
+                                                </td>
+                                                <td style="width:25%">
+                                                    @drgTime.OneDayOrders.Executed[countE].Dose
+                                                </td>
+                                                <td style="width:25%">
+                                                    @drgTime.OneDayOrders.Executed[countE].AddUserName
+                                                </td>
+                                            </tr>
+
+                                                <!-- Rander Question List -->
+                                            if (drgTime.ContinueOrders.Executed[countE].QuestionAnswerModel.Length > 0)
+                                            {
+                                                String temptQuestHeader = "";
+                                                Boolean setBackgroundColor = false;
+                                                <tr>
+                                                    <td colspan="4">
+                                                        <table class="tableOrderList" style="width:100%">
+                                                            @foreach (var questAnsItem in drgTime.OneDayOrders.Executed[countE].QuestionAnswerModel)
+                                                            {
+                                                                if (questAnsItem.Head != temptQuestHeader)
+                                                                {
+                                                                    setBackgroundColor = !setBackgroundColor;
+                                                                    if (setBackgroundColor)
+                                                                    {
+                                                                        <tr style="background-color:beige;">
+                                                                            <td style="width:35%;color:blue;">
+                                                                                @questAnsItem.Head
+                                                                            </td>
+                                                                            <td style="width:35%">
+                                                                                @questAnsItem.Title
+                                                                            </td>
+                                                                            <td style="width:30%">
+                                                                                @questAnsItem.Ans
+                                                                            </td>
+                                                                        </tr>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <tr>
+                                                                            <td style="width:35%;color:blue;">
+                                                                                @questAnsItem.Head
+                                                                            </td>
+                                                                            <td style="width:35%">
+                                                                                @questAnsItem.Title
+                                                                            </td>
+                                                                            <td style="width:30%">
+                                                                                @questAnsItem.Ans
+                                                                            </td>
+                                                                        </tr>
+                                                                    }
+
+                                                                    temptQuestHeader = questAnsItem.Head;
+                                                                }
+                                                                else
+                                                                {
+                                                                    if (setBackgroundColor)
+                                                                    {
+                                                                        <tr style="background-color:beige;">
+                                                                            <td style="width:35%">
+                                                                                &nbsp;
+                                                                            </td>
+                                                                            <td style="width:35%">
+                                                                                @Html.Raw(@questAnsItem.Title)
+                                                                            </td>
+                                                                            <td style="width:30%">
+                                                                                @questAnsItem.Ans
+                                                                            </td>
+                                                                        </tr>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <tr>
+                                                                            <td style="width:35%">
+                                                                                &nbsp;
+                                                                            </td>
+                                                                            <td style="width:35%">
+                                                                                @Html.Raw(@questAnsItem.Title)
+                                                                            </td>
+                                                                            <td style="width:30%">
+                                                                                @questAnsItem.Ans
+                                                                            </td>
+                                                                        </tr>
+                                                                    }
+                                                                }
+                                                            }
+
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            }
+
+                                            countE++;
+                                        }
+                                        <!-- #endregion show order OneDayOrders.Executed -->
+                                        <!-- #region show order coninueorders.Executed -->
+                                        @if (countE < ContinueOrdersECount)
+                                        {
+
+                                            <tr>
+                                                <!-- Header -->
+                                                <th colspan="4"><span>@drgTime.OneDayOrders.Executed[countE].OSTAT_Desc</span></th>
+                                            </tr>
+                                            <tr>
+                                                <!-- Detail -->
+                                                <td style="width:40%">
+                                                    @drgTime.OneDayOrders.Executed[countE].Service
+                                                </td>
+                                                <td style="width:10%">
+                                                    @drgTime.OneDayOrders.Executed[countE].Qty
+                                                </td>
+                                                <td style="width:25%">
+                                                    @drgTime.OneDayOrders.Executed[countE].Dose
+                                                </td>
+                                                <td style="width:25%">
+                                                    @drgTime.OneDayOrders.Executed[countE].AddUserName
+                                                </td>
+                                            </tr>
+
+                                                <!-- Rander Question List -->
+                                            if (drgTime.ContinueOrders.Executed[countE].QuestionAnswerModel.Length > 0)
+                                            {
+                                                String temptQuestHeader = "";
+                                                Boolean setBackgroundColor = false;
+                                                <tr>
+                                                    <td colspan="4">
+                                                        <table class="tableOrderList" style="width:100%">
+                                                            @foreach (var questAnsItem in drgTime.OneDayOrders.Executed[countE].QuestionAnswerModel)
+                                                            {
+                                                                if (questAnsItem.Head != temptQuestHeader)
+                                                                {
+                                                                    setBackgroundColor = !setBackgroundColor;
+                                                                    if (setBackgroundColor)
+                                                                    {
+                                                                        <tr style="background-color:beige;">
+                                                                            <td style="width:35%;color:blue;">
+                                                                                @questAnsItem.Head
+                                                                            </td>
+                                                                            <td style="width:35%">
+                                                                                @questAnsItem.Title
+                                                                            </td>
+                                                                            <td style="width:30%">
+                                                                                @questAnsItem.Ans
+                                                                            </td>
+                                                                        </tr>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <tr>
+                                                                            <td style="width:35%;color:blue;">
+                                                                                @questAnsItem.Head
+                                                                            </td>
+                                                                            <td style="width:35%">
+                                                                                @questAnsItem.Title
+                                                                            </td>
+                                                                            <td style="width:30%">
+                                                                                @questAnsItem.Ans
+                                                                            </td>
+                                                                        </tr>
+                                                                    }
+
+                                                                    temptQuestHeader = questAnsItem.Head;
+                                                                }
+                                                                else
+                                                                {
+                                                                    if (setBackgroundColor)
+                                                                    {
+                                                                        <tr style="background-color:beige;">
+                                                                            <td style="width:35%">
+                                                                                &nbsp;
+                                                                            </td>
+                                                                            <td style="width:35%">
+                                                                                @Html.Raw(@questAnsItem.Title)
+                                                                            </td>
+                                                                            <td style="width:30%">
+                                                                                @questAnsItem.Ans
+                                                                            </td>
+                                                                        </tr>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <tr>
+                                                                            <td style="width:35%">
+                                                                                &nbsp;
+                                                                            </td>
+                                                                            <td style="width:35%">
+                                                                                @Html.Raw(@questAnsItem.Title)
+                                                                            </td>
+                                                                            <td style="width:30%">
+                                                                                @questAnsItem.Ans
+                                                                            </td>
+                                                                        </tr>
+                                                                    }
+                                                                }
+                                                            }
+
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            }
+
+                                            countE++;
+                                        }
+                                        <!-- #endregion show order OneDayOrders.Executed -->
+                                        }
+                                        
+
+
+                                    </table>
+                                </div>
+                                <span class="timeline-author"></span>
+                            </div>
+                        }
+                        <!--#endregion-->
+
+                    }
+
+                    @if (time != drgTime.StartTime)
+                    {
+                        time = @drgTime.StartTime;
+                        <div class="meta-date">
+                            <span class="date">@drgTime.StartTime</span>
+                        </div>
+                    }
+
+                </div>
+            }
+        }
+
+    </div>
+    <div class="timeline-end">End</div>
+</section>
